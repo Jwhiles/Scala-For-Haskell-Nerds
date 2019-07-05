@@ -100,6 +100,7 @@ import module.{Horse => Pferd}             // import a thing and rename it
 SBT is the go to tools
 useful stuff
 
+
 - `sbt` will open up the interactive sbt tool. From there you can do a number of
   useful commands such as
 

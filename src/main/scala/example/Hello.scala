@@ -1,4 +1,5 @@
 package example
+import module._
 
 
 object MyModule {

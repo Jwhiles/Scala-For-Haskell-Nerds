@@ -70,6 +70,61 @@ scalazors refer to this recall to such functions as having [Multiple Parameter L
 But a better way to think about it is that all scala functions have accept some
 number of tuples of various sizes.
 
+### But HOW do we do a type class
+
+Scala gives us the tool to roughly emulate Haskell's type classes.
+
+For example
+
+```scala
+trait Monoid[A] {
+  def mappend(a1: A, a2: A): A
+  def mempty: A
+}
+// this is like a type class definition. We describe what it takes to make a
+// monoid
+// 1) some type A
+// 2) an append operation
+// 3) a member of the type A - which acts as an identity element
+
+
+implict object IntMonoid extends Monoid[Int] {
+  def mappend(a1: Int, a2: Int): Int = a1 + a2
+  def mempty: Int = 0
+}
+// Defining the sum monoid over integers
+// note the implicit keyword - that tells the compiler to use this
+implementation when we ask for an implicit implementation
+
+
+def mconcat (xs: List[A])(implicit m: Monoid[A]): A =
+  xs.foldRight(m.mempty)(m.mappend)
+// We can then implement functions based on our monoid. Wow
+
+mconcat(List(1,2,3,4))
+
+// We can also add monoids for other types
+implicit object StringMonoid extends Monoid[String] {
+  def mapp(a1: String, a2: String): String = a1 ++ a2
+  def memp: String = ""
+}
+
+// and reuse our functions
+mconcat(List("hey", "hun"))
+```
+
+But what if I want to define multipl monoids for the same type?!
+
+```
+object IntProdMonoid extends Monoid[Int] {
+  def mappend(a1: Int, a2: Int): Int = a1 * a2
+  def mempty: Int = 1
+}
+// we can't label this as implicit as well - or everything will break
+```
+
+In Haskell we would use newtypes. I've no idea what the scala approach is!
+
 ### Stuff about MAIN functions
 
 Much like Haskell, scalasters like having a main function. There are some
@@ -99,7 +154,6 @@ import module.{Horse => Pferd}             // import a thing and rename it
 
 SBT is the go to tools
 useful stuff
-
 
 - `sbt` will open up the interactive sbt tool. From there you can do a number of
   useful commands such as

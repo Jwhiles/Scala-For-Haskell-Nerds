@@ -11,6 +11,9 @@ lazy val root = (project in file("."))
     libraryDependencies += scalaTest % Test
   )
 
+libraryDependencies += "dev.zio" %% "zio" % "1.0.0-RC9"
+libraryDependencies += "org.scalaz" %% "scalaz-core" % "7.2.28"
+
 // Uncomment the following for publishing to Sonatype.
 // See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for more detail.
 

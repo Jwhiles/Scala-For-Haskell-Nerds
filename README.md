@@ -4,6 +4,8 @@ scala-stuff
 
 ## Differences from Haskell
 
+### Data Types
+
 declaring data types is uglier
 
 ```hs
@@ -17,6 +19,28 @@ sealed trait List[+A]
 case object Nil extends List[Nothing]
 case class Cons[+A](head: A, tail: List[A]) extends List[A]
 ```
+
+#### Companion Objects
+In scala we tend to create 'companion objects' to our data types - these contain
+functions which operator on the data type.
+
+For example a companion object for the List data type above might contain
+functions to reverse, filter, or sort the list.
+
+```
+object List
+  def reverse [A](xs: List[A]): List[A] = reverseHelper(xs, Nil)
+  // a function that we are exposing
+
+  private def reverseHelper [A](xs: List[A], acc: List[A]): List [A]
+    = xs match {
+      case Nil => acc
+      case Cons(head, tail) = reverseHelper(tail, Cons(head, acc))
+    }
+  // a privater helper function that we use internally
+```
+
+
 
 ### Stuff about functions
 
@@ -44,6 +68,30 @@ def badIdentity[A](a: A): A = {
 
 maybe this is time to mention
 
+#### Functions with variable numbers of arguments
+We can define functions that for a given type, accept zero or more arguments of
+that type.
+
+```
+  def why(as: Int*): Int = 
+    if (as.isEmpty) 0
+    else as.head + (why(as.tail: _*))
+```
+
+
+
+Why not define these as functions that take a list you ask? 
+
+Why not indeed
+
+These sorts of functions are actually syntactic sugar for using the interface `Seq`.
+
+
+Scala data types often have an `apply` function, which is used to construct
+instances of that datatype. These variadic functions are thus required to build
+instances of data types like Lists - for example the idiomatic `List(1,2,3)`
+requires an apply method to work
+
 ### Scala has absolutely out of control side effects
 
 Do anything you want, anywhere, all the time. Assume that every line of every
@@ -69,6 +117,37 @@ scalazors refer to this recall to such functions as having [Multiple Parameter L
 
 But a better way to think about it is that all scala functions have accept some
 number of tuples of various sizes.
+
+### Non Strictness
+We can manually force our functions to be non strict
+
+```
+def lazyIf[A](cond: Boolean, onTrue: () => A, onFalse: () => A): A =
+  if (cond) onTrue() else onFalse()
+
+lazyIf(a < 22,
+  () => "a",
+  () => "b"
+)
+```
+
+Essentially we are just turning arguments we want to be lazy into thunks.
+
+
+defining functions like this - and having to manually thunkify our function calls
+is kind of lame though. So Scala provides some syntactic sucre.
+
+```
+def lazyIf[A](cond: Boolean, onTrue: => A, onFalse: => A): A =
+  if (cond) onTrue else onFalse
+```
+
+We can then call this function like so
+```
+lazyIf(a < 22, "a", "b")
+```
+
+
 
 ### But HOW do we do a type class
 
